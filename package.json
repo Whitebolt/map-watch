@@ -1,6 +1,6 @@
 {
   "name": "map-watch",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Extension to native Map classes, allowing the watching and reporting on map value changes.",
   "main": "index.js",
   "scripts": {

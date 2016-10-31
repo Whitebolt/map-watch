@@ -48,8 +48,8 @@ function _getPrivateMap(self, key) {
  */
 function _fire(self, key, value) {
 	let watchers = _getPrivateMap(self, 'watchers');
-	let oldValue = self.get(key);
-	if (watchers.has(key)) watchers.get(key).forEach(
+	let oldValue = _getPrivateMap(self, 'previous').get(key);
+	if ((value !== oldValue) && watchers.has(key)) watchers.get(key).forEach(
 		_callback=>{
 			if (_callback.context) {
 				_callback.callback.call(_callback.context, value, oldValue);
@@ -97,7 +97,7 @@ function _randomString(length=32) {
  * 						key-value pair is added to the new Map. null is treated
  * 						as undefined.
  */
-module.exports = class WatchMap extends Map {
+class WatchMap extends Map {
 	constructor(iterable) {
 		super(iterable);
 		_getPrivate(this);
@@ -114,8 +114,9 @@ module.exports = class WatchMap extends Map {
 	 */
 	set(key, value) {
 		_getPrivateMap(this, 'previous').set(key, this.get(key));
+		let returner = super.set(key, value);
 		_fire(this, key, value);
-		return super.set(key, value);
+		return returner;
 	}
 
 	/**
@@ -128,8 +129,9 @@ module.exports = class WatchMap extends Map {
 	 */
 	delete(key) {
 		let _private = _getPrivateMap(this, 'previous');
+		let returner = super.delete(key);
 		if (_private.has(key)) _private.delete(key);
-		return super.delete(key);
+		return returner;
 	}
 
 	/**
@@ -207,3 +209,5 @@ module.exports = class WatchMap extends Map {
 		return (_getPrivateMap(this, 'watchers').get(key) || []).length;
 	}
 };
+
+module.exports = WatchMap;
